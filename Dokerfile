@@ -1,0 +1,19 @@
+# Dockerfile para API .NET 8
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["MulticloudAPI.csproj", "./"]
+RUN dotnet restore "MulticloudAPI.csproj"
+COPY . .
+RUN dotnet build "MulticloudAPI.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "MulticloudAPI.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "MulticloudAPI.dll"]
