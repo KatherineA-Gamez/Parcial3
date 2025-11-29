@@ -28,7 +28,7 @@ app.MapPost("/api/data", async (RequestWrapper wrapper, AppDbContext db, IConfig
     {
         var data = wrapper.contacto;
 
-   
+
         var entity = new DataEntity
         {
             Uuid = data.uuid,
@@ -41,13 +41,13 @@ app.MapPost("/api/data", async (RequestWrapper wrapper, AppDbContext db, IConfig
         db.DataEntities.Add(entity);
         await db.SaveChangesAsync();
 
-   
+
         string serverIp = Dns.GetHostEntry(Dns.GetHostName())
             .AddressList
             .FirstOrDefault(ip => ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
             ?.ToString() ?? "Unknown";
 
-  
+
         await SendEmail(data.correo, data.nombre, data.uuid, serverIp, config);
 
         await SendSms(data.telefono, data.nombre, data.uuid, serverIp, config);
@@ -130,6 +130,7 @@ public class AppDbContext : DbContext
     {
         modelBuilder.Entity<DataEntity>(entity =>
         {
+            entity.ToTable("registros"); 
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Uuid).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Nombre).IsRequired().HasMaxLength(200);
